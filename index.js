@@ -16,7 +16,7 @@ const msgRetryCounterCache = new NodeCache()
 
 // start a connection
 const startSock = async () => {
-    const { state, saveCreds } = await usePostgresAuthState('bot_teste_123')
+    const { state, saveCreds } = await usePostgresAuthState('bot_teste_123', true)
     // fetch latest version of WA Web
     const { version, isLatest } = await fetchLatestBaileysVersion()
     console.log(`using WA v${version.join('.')}, isLatest: ${isLatest}`)

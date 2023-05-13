@@ -1,29 +1,58 @@
+import fs from 'fs/promises'
+import path from 'path'
 import { WAProto as proto, initAuthCreds, BufferJSON } from "@whiskeysockets/baileys"
 
 import getDbConnection from "./db.js"
 
-export default async function usePostgresAuthState(sessionID) {
+export default async function usePostgresAuthState(sessionID, saveOnlyCreds = false) { // parametro para informar ao script para salvar apenas a key creds no DB
+    // essa key é a principal necessaria para o baileys autenticar no whasapp web
+    // adicionei essa função pois pode se tornar problematico armazenar todas as keys no db sem nenhum controle, ainda mais se voce tiver varios bots usando o mesmo db
+    // pode acabar salvando muitas keys que se tornam inuteis posteriormente e continuariam ocupando espaço no DB.
+    // dessa forma, com o saveOnlyCreds = true, apenas a key necessaria para logar o bot é salva no DB e esse script irá 
+    // armazenar as demais localmente na pasta /sessions/<sessionID>/<key>.json
+
+    const localFolder = path.join(process.cwd(), 'sessions', sessionID) // pasta local pra salvamento das keys separadas por pastas de acordo com o sessionID
+    const localFile = (key) => path.join(localFolder, (fixFileName(key) + '.json')) // função que retorna o caminho absoluto da key ja com o nome normalizado
+    if (saveOnlyCreds) await fs.mkdir(localFolder, { recursive: true }); // cria as pastas das sessoes caso o saveOnlyCreds = true
+
 
     async function writeData(data, key) {
         const dataString = JSON.stringify(data, BufferJSON.replacer);
+
+        if (saveOnlyCreds && key != 'creds') { // caso saveOnlyCreds = true, ele salva todas as keys localmente (exceto a creds.json)
+            await fs.writeFile(localFile(key), dataString)
+            return;
+        }
         await insertOrUpdateAuthKey(sessionID, key, dataString)
         return;
     };
 
     async function readData(key) {
         try {
-            const rawData = await getAuthKey(sessionID, key)
+
+            let rawData = null;
+
+            if (saveOnlyCreds && key != 'creds') { // caso saveOnlyCreds = true, ele busca todas as keys localmente (exceto a creds.json)
+                rawData = await fs.readFile(localFile(key), { encoding: 'utf-8' })
+            } else {
+                rawData = await getAuthKey(sessionID, key)
+            }
+
             const parsedData = JSON.parse(rawData, BufferJSON.reviver);
             return parsedData;
         } catch (error) {
-            console.log('❌', error.message)
+            console.log('❌ readData', error.message)
             return null;
         }
     }
 
     async function removeData(key) {
         try {
-            await deleteAuthKey(sessionID, key)
+            if (saveOnlyCreds && key != 'creds') { // caso saveOnlyCreds = true, ele deleta a key localmente (exceto a creds.json)
+                await fs.unlink(localFile(key))
+            } else {
+                await deleteAuthKey(sessionID, key)
+            }
         } catch (error) {
             // Não fazer nada em caso de erro
         }
@@ -68,6 +97,15 @@ export default async function usePostgresAuthState(sessionID) {
         }
     };
 }
+
+const fixFileName = (file) => { // função que normaliza o nome da key
+    if (!file) {
+        return undefined;
+    }
+    const replacedSlash = file.replace(/\//g, '__');
+    const replacedColon = replacedSlash.replace(/:/g, '-');
+    return replacedColon;
+};
 
 
 async function insertOrUpdateAuthKey(botId, keyId, keyJson) {
