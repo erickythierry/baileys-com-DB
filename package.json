@@ -1,0 +1,20 @@
+{
+  "name": "baileys-postgresql",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@adiwajshing/keyed-db": "^0.2.4",
+    "@whiskeysockets/baileys": "^6.0.0",
+    "pg": "^8.10.0",
+    "pino": "^8.14.1",
+    "qrcode-terminal": "^0.12.0"
+  }
+}
