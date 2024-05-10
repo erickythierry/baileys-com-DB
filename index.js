@@ -3,9 +3,11 @@ import makeWASocket, {
     DisconnectReason, fetchLatestBaileysVersion, getAggregateVotesInPollMessage,
     makeCacheableSignalKeyStore, isJidBroadcast
 } from '@whiskeysockets/baileys'
+import dotenv from 'dotenv';
+dotenv.config();
 
 import logger from './logs.js'
-import usePostgresAuthState from './usePostgresAuthStore.js';
+import usePrismaDBAuthStore from './usePrismaDBAuthStore.js';
 
 
 const doReplies = !process.argv.includes('--no-reply')
@@ -16,7 +18,7 @@ const msgRetryCounterCache = new NodeCache()
 
 // start a connection
 const startSock = async () => {
-    const { state, saveCreds } = await usePostgresAuthState('bot_teste_123', true)
+    const { state, saveCreds } = await usePrismaDBAuthStore('bot_teste_123')
     // fetch latest version of WA Web
     const { version, isLatest } = await fetchLatestBaileysVersion()
     console.log(`using WA v${version.join('.')}, isLatest: ${isLatest}`)

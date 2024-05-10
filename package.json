@@ -1,20 +1,25 @@
 {
-  "name": "baileys-postgresql",
+  "name": "baileys-with-prisma-save-sessions-on-db",
   "version": "1.0.0",
-  "description": "",
+  "description": "salvando sessoes do baileys direto em um DB com o prisma",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node ."
+    "start": "node .",
+    "postinstall": "npx prisma migrate deploy"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
-    "@whiskeysockets/baileys": "^6.0.0",
-    "pg": "^8.10.0",
+    "@prisma/client": "^5.13.0",
+    "@whiskeysockets/baileys": "^6.6.0",
+    "dotenv": "^16.4.5",
     "pino": "^8.14.1",
     "qrcode-terminal": "^0.12.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.13.0"
   }
 }

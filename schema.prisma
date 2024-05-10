@@ -1,0 +1,17 @@
+datasource db {
+    provider = "mysql" // modifique para usar postgresql se for sua preferencia
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model Session {
+    id        Int      @id @unique @default(autoincrement())
+    sessionID String   @unique @default(cuid())
+    creds     String?  @db.Text
+    createdAt DateTime @default(now())
+
+    @@map("sessions")
+}
