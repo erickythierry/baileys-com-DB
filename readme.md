@@ -1,4 +1,4 @@
-# Baileys com Prisma para salvar as sessões em um DB (MySQL, Postgres, etc)
+# Baileys com DB prisma para salvar as sessões em um DB (MySQL, Postgres, etc)
 
 ### Este é um exemplo inicial de como usar o projeto Baileys e armazenar as chaves de autenticação em um banco de dados.
 
